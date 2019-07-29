@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<body bgcolor="#e2dedb"> 
+<body onload = "init()" bgcolor="#e2dedb"> 
 <script src="https://d3js.org/d3.v5.min.js"></script>
 
 
@@ -43,12 +43,16 @@
 </div>
 
 <script>
-    var data = d3.csv("https://goodbye-moonmen.github.io/narative_viz/tmdb_5000_movies.csv")
-    data.then(
-        function(res) {
-            console.log(res)
-        }
-    )
+
+    async function init() {
+        var data = await d3.tsv("https://goodbye-moonmen.github.io/narative_viz/movieSimple.tsv");
+        console.log(data[0])
+        genre = JSON.parse(data.genre)
+    
+    
+    }
+
+
 </script>
 </body>
 </html>
