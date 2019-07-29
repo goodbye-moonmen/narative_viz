@@ -1,20 +1,54 @@
 <!DOCTYPE html>
 <html>
-<body onload = 'init()'>
+<body bgcolor="#e2dedb"> 
 <script src="https://d3js.org/d3.v5.min.js"></script>
-<h1>IMDB Movie Visualization (1935 - 2015)</h1>
-<p>I'm hosted with GitHub Pages.</p>
-<svg width=300 height=300>
-</svg>
+
+
+
+<p>
+    <font face="Tahoma" size = 6.5px color="#474440">
+        Movie Visualization (1950 - 2017)
+
+    </font>
+</p>
+
+<p>
+    <font size = 3px face="helvetica" color="#474440">
+            Look into movie revenue in the past decades.
+    </font>
+</p>
+
+
+
+<div id="bubble-drop" style="margin:50px; padding:20px; border:2px solid #474440; background-color:#eeecea">
+    <svg width=1000 height=400 >
+
+    </svg>
+
+    <p>
+    
+    
+    </p>
+</div>
+
+<div id="line-graph" style="margin:50px; padding:20px; border:2px solid #474440; background-color: #eeecea">
+        <svg width=1000 height=400 >
+            
+        </svg>
+    
+        <p>
+        
+        
+        </p>
+</div>
+
 <script>
-async function init(){
-    var data = await d3.csv("tmdb_5000_movies.csv");
-
-}
-
-
-
-
+    var data = d3.csv("https://goodbye-moonmen.github.io/narative_viz/tmdb_5000_movies.csv")
+    data.then(
+        function(res) {
+            console.log(res)
+        }
+    )
 </script>
 </body>
 </html>
