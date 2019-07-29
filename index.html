@@ -43,12 +43,48 @@
 </div>
 
 <script>
-
+    var data_final = []
     async function init() {
         var data = await d3.tsv("https://goodbye-moonmen.github.io/narative_viz/movieSimple.tsv");
-        console.log(data[0])
-        genre = JSON.parse(data.genre)
-    
+
+/*         for (i = 0; i < data.length)
+        {
+            var genre = JSON.parse(data[1].Genres);
+            var genre_clean = [];
+            for (i = 0; i < genre.length; i++) 
+            { 
+                genre_clean.push(genre[i].name);
+            }
+        } 
+
+        console.log(genre_clean); */
+        genre_all = {};
+        data.forEach(
+            function(each){
+                genre_each = JSON.parse(each.Genres);
+                for (each in genre_each)
+                {
+                    if (!genre_all[each.name])
+                    {
+                        genre_all[each.name] = 1;
+                    }
+                    else 
+                    {
+                        genre_all[each.name] = genre_all[each.name] + 1;
+                    }
+                    
+                };
+            }
+        );
+
+
+
+
+
+
+
+
+        
     
     }
 
