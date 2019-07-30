@@ -1,18 +1,44 @@
 <!DOCTYPE html>
 <html>
-<body onload = "init()" bgcolor="#e2dedb"> 
+
+
+<style>
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin: auto;
+  position: relative;
+  width: 960px;
+  background-color: #e2dedb;
+}
+
+
+
+
+
+
+
+</style>
+
+
+
+
+
+
+
+<body onload = "visualize()"> 
 <script src="https://d3js.org/d3.v5.min.js"></script>
 
 
 
-<p>
+
+
+<p id="title">
     <font face="Tahoma" size = 6.5px color="#474440">
         Movie Visualization (1950 - 2017)
-
     </font>
 </p>
 
-<p>
+<p id="sub-title">
     <font size = 3px face="helvetica" color="#474440">
             Look into movie revenue in the past decades.
     </font>
@@ -20,8 +46,8 @@
 
 
 
-<div id="bubble-drop" style="margin:50px; padding:20px; border:2px solid #474440; background-color:#eeecea">
-    <svg width=1000 height=400 >
+<div id="donut" style="margin:50px; padding:20px; border:2px solid #474440; background-color:#eeecea">
+    <svg height=400 >
 
     </svg>
 
@@ -32,63 +58,11 @@
 </div>
 
 <div id="line-graph" style="margin:50px; padding:20px; border:2px solid #474440; background-color: #eeecea">
-        <svg width=1000 height=400 >
-            
+        <svg height=400 >
         </svg>
-    
         <p>
-        
-        
         </p>
 </div>
-
-<script>
-    var data_final = []
-    async function init() {
-        var data = await d3.tsv("https://goodbye-moonmen.github.io/narative_viz/movieSimple.tsv");
-
-/*         for (i = 0; i < data.length)
-        {
-            var genre = JSON.parse(data[1].Genres);
-            var genre_clean = [];
-            for (i = 0; i < genre.length; i++) 
-            { 
-                genre_clean.push(genre[i].name);
-            }
-        } 
-
-        console.log(genre_clean); */
-        genre_all = {};
-        data.forEach(
-            function(each){
-                genre_each = JSON.parse(each.Genres);
-                for (each in genre_each)
-                {
-                    if (!genre_all[each.name])
-                    {
-                        genre_all[each.name] = 1;
-                    }
-                    else 
-                    {
-                        genre_all[each.name] = genre_all[each.name] + 1;
-                    }
-                    
-                };
-            }
-        );
-
-
-
-
-
-
-
-
-        
-    
-    }
-
-
-</script>
+<script src="interactivePie.js"></script>
 </body>
 </html>
