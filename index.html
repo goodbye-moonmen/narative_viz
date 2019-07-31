@@ -1,68 +1,33 @@
 <!DOCTYPE html>
 <html>
-
-
-<style>
-body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  margin: auto;
-  position: relative;
-  width: 960px;
-  background-color: #e2dedb;
-}
-
-
-
-
-
-
-
-</style>
-
-
-
-
-
-
-
-<body onload = "visualize()"> 
-<script src="https://d3js.org/d3.v5.min.js"></script>
-
-
-
-
-
-<p id="title">
-    <font face="Tahoma" size = 6.5px color="#474440">
-        Movie Visualization (1950 - 2017)
-    </font>
-</p>
-
-<p id="sub-title">
-    <font size = 3px face="helvetica" color="#474440">
-            Look into movie revenue in the past decades.
-    </font>
-</p>
-
-
-
-<div id="donut" style="margin:50px; padding:20px; border:2px solid #474440; background-color:#eeecea">
-    <svg height=400 >
-
-    </svg>
-
-    <p>
-    
-    
-    </p>
-</div>
-
-<div id="line-graph" style="margin:50px; padding:20px; border:2px solid #474440; background-color: #eeecea">
-        <svg height=400 >
-        </svg>
-        <p>
-        </p>
-</div>
-<script src="interactivePie.js"></script>
-</body>
+	<head>
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body onload="loadData()">
+		<p id="title">
+			<font face="Tahoma" size="6.5px" color="#474440">
+				Movie Visualization (1950 - 2017)
+			</font>
+		</p>
+		<p id="sub-title">
+			<font size="3px" face="helvetica" color="#474440">
+				Look into movie revenue in the past decades.
+			</font>
+		</p>
+		<div class="visualizationContainer">
+			<div id="donutSelectorContainer" style="display: flex; width:100%;">
+				<a id="decade1950" class="decadeButton ripple" onclick="setDecade(1950)">1950</a>
+				<a id="decade1960" class="decadeButton ripple" onclick="setDecade(1960)">1960</a>
+				<a id="decade1970" class="decadeButton ripple" onclick="setDecade(1970)">1970</a>
+				<a id="decade1980" class="decadeButton ripple" onclick="setDecade(1980)">1980</a>
+				<a id="decade1990" class="decadeButton ripple" onclick="setDecade(1990)">1990</a>
+				<a id="decade2000" class="decadeButton ripple" onclick="setDecade(2000)">2000</a>
+				<a id="decade2010" class="decadeButton ripple" onclick="setDecade(2010)">2010</a>
+			</div>
+			<div id="donut"></div>
+		</div>
+		<div id="lineGraph" class="visualizationContainer"></div>
+		<script src="https://d3js.org/d3.v5.min.js"></script>
+		<script src="interactivePie.js"></script>
+	</body>
 </html>
