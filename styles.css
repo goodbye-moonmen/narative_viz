@@ -3,7 +3,7 @@ body {
 	margin: auto;
 	position: relative;
 	width: 960px;
-	background-color: #e2dedb;
+	background-color: #ffffff;
 }
 
 .visualizationContainer {
@@ -12,15 +12,15 @@ body {
 	padding: 20px;
 	text-align: center;
 	/* border: 2px solid #474440; */
-	background-color: #eeecea;
+	background-color: #ffffff;
 	/* Add shadows to create the "card" effect */
-	box-shadow: 0 4px 8px 0 #000000;
+	box-shadow: 0 4px 8px 0 #797979;
 	transition: 0.3s;
 }
 
 /* On mouse-over, add a deeper shadow */
 .visualizationContainer:hover {
-	box-shadow: 0 8px 16px 0 #797979;
+	box-shadow: 0 8px 16px 0 #9c9c9c;
 }
 
 .decadeButton {
@@ -28,16 +28,22 @@ body {
 	flex-grow: 1;
 	padding: 10px 5px 10px 5px;
 	margin: 5px;
-	box-shadow: 0 4px 8px 0 #6b6b6b;
+	border: 1px solid #99a4b3;
 }
 
 .decadeButton:hover {
 	cursor: pointer;
-	background-color: #ffffff;
 }
 
 .selectedDecade {
-	background-color: #ffffff;
+	background-color: #a4edf8;
+}
+
+.piePath {
+	opacity: 0.8;
+}
+.piePath:hover {
+	opacity: 1;
 }
 
 /*

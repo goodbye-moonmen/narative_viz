@@ -1,22 +1,62 @@
-let currentDecade = 1950;
+let gCurrentDecade = 1950;
 let previousDecade = 1950;
 const height = 500;
 const width = 500;
-let globalData;
+let gData;
+let globalPathHandle;
+let globalPieHandle;
+let globalArcHandle;
 
-function setDecade(decade) {
-	previousDecade = currentDecade;
-	currentDecade = decade;
-	document.getElementById(`decade${previousDecade}`).classList.remove("selectedDecade");
-	document.getElementById(`decade${currentDecade}`).classList.add("selectedDecade");
-	clearExistingPieChart();
-	drawPieChartByDecade(currentDecade, globalData, height, width);
+function changeDecade(decade) {
+	document.getElementById(`decade${gCurrentDecade}`).classList.remove("selectedDecade");
+	gCurrentDecade = decade;
+	document.getElementById(`decade${gCurrentDecade}`).classList.add("selectedDecade");
+	updatePie();
 }
 
-async function loadData() {
+async function init() {
 	d3.selectAll(".decadeButton").attr("disabled", true);
-	globalData = await fetchDataFromWeb();
+	gData = await fetchDataFromWeb();
 	d3.selectAll(".decadeButton").attr("disabled", false);
+	const radius = Math.min(height, width) / 2;
+	const gCurrentDecade = 1950;
+	const colors = d3.scaleOrdinal(d3.schemePaired);
+	globalPieHandle = d3
+		.pie()
+		.value((d) => d.revenue)
+		.sort(null);
+	// .padAngle(0.01);
+	const svg = d3
+		.select("#donut")
+		.append("svg")
+		.attr("width", width + 250)
+		.attr("height", height)
+		.append("g")
+		.attr("transform", `translate(${width / 2}, ${height / 2})`);
+	globalArcHandle = d3
+		.arc()
+		.innerRadius(radius - 100)
+		.outerRadius(radius - 20);
+	globalPathHandle = svg
+		.selectAll("path")
+		.data(globalPieHandle(getRevenueData()))
+		.enter()
+		.append("path")
+		.attr("class", "piePath")
+		.attr("fill", (_d, i) => colors(i))
+		.attr("d", globalArcHandle)
+		.attr("stroke-width", "2px")
+		.on("mouseover", (d, i) => handlePiePieceHover(d, i, svg))
+		.on("mouseout", () => handlePiePieceLeave());
+}
+
+function updatePie() {
+	d3.select("#donut")
+		.selectAll("path")
+		.data(globalPieHandle(getRevenueData()))
+		.transition()
+		.duration(500)
+		.attr("d", globalArcHandle);
 }
 
 async function fetchDataFromWeb() {
@@ -26,55 +66,44 @@ async function fetchDataFromWeb() {
 	return data;
 }
 
-function drawPieChartByDecade(selectedDecade, data, height, width) {
-	const radius = Math.min(height, width) / 2;
-	const decadeData = data.filter((d) => d.year === selectedDecade && !!d.genres);
-	const computedRevenuData = computeRevenueData(decadeData);
-	const pie = d3
-		.pie()
-		.value((d) => d.revenue)
-		.sort(null);
-	const svg = d3
-		.select("#donut")
-		.append("svg")
-		.attr("width", width)
-		.attr("height", height)
-		.append("g")
-		.attr("transform", `translate(${width / 2}, ${height / 2})`);
-	const arc = d3
-		.arc()
-		.innerRadius(radius - 100)
-		.outerRadius(radius - 20);
-	svg.selectAll("path")
-		.data(pie(computedRevenuData))
-		.enter()
-		.append("path")
-		.attr("fill", (_d, i) => d3.interpolateSinebow(i / GENRES_CONST.length))
-		.attr("d", arc)
-		.attr("stroke", "#eeecea")
-		.attr("stroke-width", "2")
-		.on("mouseover", (d, i) => handlePiePieceHover(d, i));
-	svg.append("div")
-		.attr("width", width)
-		.attr("height", height)
-		.attr("transform", `translate(${width / 2}, ${height / 2})`);
+function handlePiePieceLeave() {
+	d3.select("#genreLabel").remove();
+	d3.select("#revenueLabel").remove();
+	d3.select("#countLabel").remove();
 }
 
-function clearExistingPieChart() {
-	d3.select("#donut").html("");
-}
-
-function handlePiePieceHover(d, i) {
+function handlePiePieceHover(_d, i, svg) {
+	const decadeData = gData.filter((d) => d.decade === gCurrentDecade && !!d.genres);
+	const computedRevenuData = getRevenueData(decadeData);
+	handlePiePieceLeave();
 	currentHighlightGenre = GENRES_CONST[i];
+	svg.append("text")
+		.attr("id", "genreLabel")
+		.attr("text-anchor", "middle")
+		.attr("dy", "-18")
+		.text(`Genre: ${currentHighlightGenre}`);
+	svg.append("text")
+		.attr("id", "revenueLabel")
+		.attr("text-anchor", "middle")
+		.attr("dy", "0")
+		.text(`Movie count: ${computedRevenuData[i].count}`);
+	svg.append("text")
+		.attr("id", "countLabel")
+		.attr("text-anchor", "middle")
+		.attr("dy", "18")
+		.text(`Total revenue: $${computedRevenuData[i].revenue.toFixed(2)}M`);
 }
 
-function computeRevenueData(decadeData) {
-	const result = GENRES_CONST.map((g) => ({ name: g, revenue: 0 }));
+function getRevenueData() {
+	const decadeData = gData.filter((d) => d.decade === gCurrentDecade && !!d.genres);
+	const result = GENRES_CONST.map((g) => ({ name: g, revenue: 0, count: 0 }));
 	decadeData.forEach((d) => {
-		const splitRevenue = d.revenue / d.genres.length;
-		d.genres.forEach((g) => {
+		const limitedGenres = d.genres.filter((g) => GENRES_CONST.includes(g));
+		const splitRevenue = d.revenue / limitedGenres.length;
+		limitedGenres.forEach((g) => {
 			const index = GENRES_CONST.indexOf(g);
 			result[index]["revenue"] = result[index]["revenue"] + splitRevenue;
+			result[index]["count"] = result[index]["count"] + 1;
 		});
 	});
 	return result;
@@ -107,46 +136,46 @@ function transformData(entry) {
 const GENRES_CONST = [
 	"Action",
 	"Adventure",
-	"Animation",
+	// "Animation",
 	"Comedy",
 	"Crime",
-	"Documentary",
+	// "Documentary",
 	"Drama",
 	"Family",
 	"Fantasy",
-	"Foreign",
-	"History",
+	// "Foreign".
+	// "History",
 	"Horror",
-	"Music",
+	// "Music",
 	"Mystery",
 	"Romance",
 	"Science Fiction",
-	"TV Movie",
+	// "TV Movies",
 	"Thriller",
-	"War",
-	"Western",
+	// "War",
+	// "Western",
 ];
 // All possible genres
 // Action: 1716
 // Adventure: 1099
-// Animation: 376
+// Animation: 376 <- This is ignored
 // Comedy: 2572
 // Crime: 1071
-// Documentary: 220
+// Documentary: 220 <- This is ignored
 // Drama: 3583
 // Family: 665
 // Fantasy: 622
-// Foreign: 84
-// History: 283
+// Foreign: 84 <- This is ignored
+// History: 283 <- This is ignored
 // Horror: 729
-// Music: 253
+// Music: 253 <- This is ignored
 // Mystery: 536
 // Romance: 1389
 // Science Fiction: 738
 // TV Movie: 1 <- This is ignored
 // Thriller: 1854
-// War: 229
-// Western: 109
+// War: 229 <- This is ignored
+// Western: 109 <- This is ignored
 
 // Genre keys:
 // id
