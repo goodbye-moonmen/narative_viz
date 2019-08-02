@@ -1,11 +1,29 @@
 let gCurrentDecade = 1950;
-let previousDecade = 1950;
-const height = 500;
-const width = 500;
+const pieHeight = 500;
+const pieWidth = 500;
+const pieRadius = 250;
+const legendWidth = 250;
+const legendDotRadius = 10;
+let gCurrentHighlightGenre;
 let gData;
-let globalPathHandle;
-let globalPieHandle;
-let globalArcHandle;
+let gSVGarea = d3
+	.select("#donut")
+	.append("svg")
+	.attr("width", pieWidth + legendWidth)
+	.attr("height", pieHeight);
+let gPieArea = gSVGarea.append("g").attr("transform", `translate(${pieWidth / 2}, ${pieHeight / 2})`);
+
+const gArc = d3
+	.arc()
+	.innerRadius(pieRadius - 100)
+	.outerRadius(pieRadius - 20);
+
+const gPie = d3
+	.pie()
+	.value((d) => d.revenue)
+	.sort(null);
+
+const gColors = d3.scaleOrdinal(d3.schemePaired);
 
 function changeDecade(decade) {
 	document.getElementById(`decade${gCurrentDecade}`).classList.remove("selectedDecade");
@@ -18,45 +36,59 @@ async function init() {
 	d3.selectAll(".decadeButton").attr("disabled", true);
 	gData = await fetchDataFromWeb();
 	d3.selectAll(".decadeButton").attr("disabled", false);
-	const radius = Math.min(height, width) / 2;
-	const gCurrentDecade = 1950;
-	const colors = d3.scaleOrdinal(d3.schemePaired);
-	globalPieHandle = d3
-		.pie()
-		.value((d) => d.revenue)
-		.sort(null);
-	// .padAngle(0.01);
-	const svg = d3
-		.select("#donut")
-		.append("svg")
-		.attr("width", width + 250)
-		.attr("height", height)
-		.append("g")
-		.attr("transform", `translate(${width / 2}, ${height / 2})`);
-	globalArcHandle = d3
-		.arc()
-		.innerRadius(radius - 100)
-		.outerRadius(radius - 20);
-	globalPathHandle = svg
+	gCurrentDecade = 1950;
+
+	gPieArea
 		.selectAll("path")
-		.data(globalPieHandle(getRevenueData()))
+		.data(gPie(getRevenueData()))
 		.enter()
 		.append("path")
 		.attr("class", "piePath")
-		.attr("fill", (_d, i) => colors(i))
-		.attr("d", globalArcHandle)
+		.attr("id", (d) => `${d.data.name}_path`)
+		.attr("fill", (_d, i) => gColors(i))
+		.attr("opacity", "0.8")
+		.attr("d", gArc)
 		.attr("stroke-width", "2px")
-		.on("mouseover", (d, i) => handlePiePieceHover(d, i, svg))
-		.on("mouseout", () => handlePiePieceLeave());
+		.on("mouseover", handlePiePieceHover)
+		.on("mouseout", handlePiePieceLeave);
+
+	const legendArea = gPieArea
+		.selectAll(".legend")
+		.data(GENRES_CONST)
+		.enter()
+		.append("g")
+		.attr("class", "legend")
+		.attr("transform", (d, i) => {
+			var height = legendDotRadius * 2 + 4;
+			var offset = (height * GENRES_CONST.length) / 4;
+			var horz = -2 * legendDotRadius * 3;
+			var vert = (i % 6) * height - offset;
+			return "translate(" + ((i / 6 < 1 ? horz : -1 * horz) - 40) + "," + vert + ")";
+		});
+	legendArea
+		.append("circle")
+		.attr("id", (d) => `${d}_legend`)
+		.attr("r", legendDotRadius)
+		.style("fill", (_d, i) => gColors(i))
+		.attr("opacity", "0.8")
+		.style("stroke", (_d, i) => gColors(i))
+		.on("mouseover", handlePiePieceHover)
+		.on("mouseout", handlePiePieceLeave);
+	legendArea
+		.append("text") // NEW
+		.attr("x", legendDotRadius + 2) // NEW
+		.attr("y", legendDotRadius - 2) // NEW
+		.text((d) => d);
 }
 
 function updatePie() {
 	d3.select("#donut")
 		.selectAll("path")
-		.data(globalPieHandle(getRevenueData()))
+		.data(gPie(getRevenueData()))
 		.transition()
 		.duration(500)
-		.attr("d", globalArcHandle);
+		.attr("d", gArc)
+		.attr("id", (d) => `${d.data.name}_path`);
 }
 
 async function fetchDataFromWeb() {
@@ -67,31 +99,28 @@ async function fetchDataFromWeb() {
 }
 
 function handlePiePieceLeave() {
-	d3.select("#genreLabel").remove();
-	d3.select("#revenueLabel").remove();
-	d3.select("#countLabel").remove();
+	if (gCurrentHighlightGenre) {
+		d3.select(`#${gCurrentHighlightGenre}_legend`).attr("opacity", "0.8");
+		d3.select(`#${gCurrentHighlightGenre}_path`).attr("opacity", "0.8");
+	}
 }
 
-function handlePiePieceHover(_d, i, svg) {
-	const decadeData = gData.filter((d) => d.decade === gCurrentDecade && !!d.genres);
-	const computedRevenuData = getRevenueData(decadeData);
+function handlePiePieceHover(_d, i) {
 	handlePiePieceLeave();
-	currentHighlightGenre = GENRES_CONST[i];
-	svg.append("text")
-		.attr("id", "genreLabel")
-		.attr("text-anchor", "middle")
-		.attr("dy", "-18")
-		.text(`Genre: ${currentHighlightGenre}`);
-	svg.append("text")
-		.attr("id", "revenueLabel")
-		.attr("text-anchor", "middle")
-		.attr("dy", "0")
-		.text(`Movie count: ${computedRevenuData[i].count}`);
-	svg.append("text")
-		.attr("id", "countLabel")
-		.attr("text-anchor", "middle")
-		.attr("dy", "18")
-		.text(`Total revenue: $${computedRevenuData[i].revenue.toFixed(2)}M`);
+	gCurrentHighlightGenre = GENRES_CONST[i];
+	d3.select(`#${gCurrentHighlightGenre}_legend`).attr("opacity", "1");
+	d3.select(`#${gCurrentHighlightGenre}_path`).attr("opacity", "1");
+}
+
+function renderTextInsidePie(text) {
+	for (let i = 0; i < text.length; i++) {
+		gPieArea
+			.append("text")
+			.attr("class", "pieCenterLabel")
+			.attr("text-anchor", "middle")
+			.attr("dy", (i - 2) * 18)
+			.text(text[i]);
+	}
 }
 
 function getRevenueData() {
@@ -155,31 +184,7 @@ const GENRES_CONST = [
 	// "War",
 	// "Western",
 ];
-// All possible genres
-// Action: 1716
-// Adventure: 1099
-// Animation: 376 <- This is ignored
-// Comedy: 2572
-// Crime: 1071
-// Documentary: 220 <- This is ignored
-// Drama: 3583
-// Family: 665
-// Fantasy: 622
-// Foreign: 84 <- This is ignored
-// History: 283 <- This is ignored
-// Horror: 729
-// Music: 253 <- This is ignored
-// Mystery: 536
-// Romance: 1389
-// Science Fiction: 738
-// TV Movie: 1 <- This is ignored
-// Thriller: 1854
-// War: 229 <- This is ignored
-// Western: 109 <- This is ignored
 
-// Genre keys:
-// id
-// name
 function processGenres(rawGenres) {
 	try {
 		const entryGenres = JSON.parse(rawGenres.replace(/\'/g, '"'));
