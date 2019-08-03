@@ -26,22 +26,28 @@
 				Distribution of movie revenues for each decade by genres
 			</h2>
 			<div id="donut" style="display:flex">
-				<span id="donutChart"></span>
-				<div class="visualizationContainer" style="flex-grow: 1;text-align: left;height:400px;">
+				<div class="visualizationContainer" style="text-align: left;width:320px;height:400px;">
 					<h4>
 						Genre details
 					</h4>
 					<p id="donutInfoGeneral">
 						Please hover over a section to see more details.
 					</p>
+				</div>
+				<span id="donutChart"></span>
+				<div class="visualizationContainer" style="text-align: left;width:600px;height:400px;">
 					<h4>
 						Highest grossing movie of the genre in this decade
 					</h4>
-					<p id="donutInfoMovie">
-						Please hover over a section to see more details.
-					</p>
+					<div style="display:flex;">
+						<span style="flex-grow: 1">
+							<p id="donutInfoMovie">
+								Please hover over a section to see more details.
+							</p></span
+						>
+						<span id="posterCard"></span>
+					</div>
 				</div>
-				<div class="visualizationContainer" id="posterCard" style="width:300px;height: 400px"></div>
 			</div>
 		</div>
 		<div class="visualizationContainer">
