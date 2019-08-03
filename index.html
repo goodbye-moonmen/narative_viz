@@ -4,27 +4,45 @@
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body onload="init()">
-		<p id="title">
-			<font face="Tahoma" size="6.5px" color="#474440">
-				Movie Visualization (1950 - 2017)
-			</font>
-		</p>
-		<p id="sub-title">
-			<font size="3px" face="helvetica" color="#474440">
-				Look into movie revenue in the past decades.
-			</font>
-		</p>
+		<h1>
+			Movie genre over the years (1950-2017)
+		</h1>
 		<div class="visualizationContainer">
+			<h3>
+				Distribution of movie revenues for each decade by genres
+			</h3>
 			<div id="donutSelectorContainer" style="display: flex; width:100%;">
-				<a id="decade1950" class="decadeButton ripple" onclick="changeDecade(1950)">1950</a>
-				<a id="decade1960" class="decadeButton ripple" onclick="changeDecade(1960)">1960</a>
-				<a id="decade1970" class="decadeButton ripple" onclick="changeDecade(1970)">1970</a>
-				<a id="decade1980" class="decadeButton ripple" onclick="changeDecade(1980)">1980</a>
-				<a id="decade1990" class="decadeButton ripple" onclick="changeDecade(1990)">1990</a>
-				<a id="decade2000" class="decadeButton ripple" onclick="changeDecade(2000)">2000</a>
-				<a id="decade2010" class="decadeButton ripple" onclick="changeDecade(2010)">2010</a>
+				<a id="decade1950" class="decadeButton ripple" onclick="changeDecade(1950)">1950s</a>
+				<a id="decade1960" class="decadeButton ripple" onclick="changeDecade(1960)">1960s</a>
+				<a id="decade1970" class="decadeButton ripple" onclick="changeDecade(1970)">1970s</a>
+				<a id="decade1980" class="decadeButton ripple" onclick="changeDecade(1980)">1980s</a>
+				<a id="decade1990" class="decadeButton ripple" onclick="changeDecade(1990)">1990s</a>
+				<a id="decade2000" class="decadeButton ripple" onclick="changeDecade(2000)">2000s</a>
+				<a id="decade2010" class="decadeButton ripple" onclick="changeDecade(2010)">2010s</a>
 			</div>
-			<div id="donut"></div>
+			<div id="donut" style="display:flex">
+				<span id="donutChart"></span>
+				<div class="visualizationContainer" style="flex-grow: 1;text-align: left">
+					<h4>
+						Genre details
+					</h4>
+					<p id="donutInfoGeneral" style="height: 25%">
+						Please hover over a section to see more details.
+					</p>
+					<h4>
+						Highest grossing movie of the genre in this decade
+					</h4>
+					<p id="donutInfoMovie">
+						Please hover over a section to see more details.
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="visualizationContainer">
+			<h3>
+				Change in movie revenues by genres
+			</h3>
+			<div id="bars" style="display:flex"></div>
 		</div>
 		<script src="https://d3js.org/d3.v5.min.js"></script>
 		<script src="interactivePie.js"></script>
