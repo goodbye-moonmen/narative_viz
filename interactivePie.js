@@ -5,8 +5,6 @@ const pieRadius = 250;
 const widthPadding = 0;
 const heighPadding = 0;
 const legendDotRadius = 10;
-let gCurrentHighlightGenre;
-let gData;
 let gSVGarea = d3
 	.select("#donutChart")
 	.append("svg")
@@ -30,13 +28,21 @@ const gPie = d3
 	.value((d) => d.revenue)
 	.sort(null);
 
-const gColors = d3.scaleOrdinal(d3.schemePaired);
-
-function changeDecade(decade) {
-	document.getElementById(`decade${gCurrentDecade}`).classList.remove("selectedDecade");
-	gCurrentDecade = decade;
-	document.getElementById(`decade${gCurrentDecade}`).classList.add("selectedDecade");
-	updatePie();
+function gColors(i) {
+	switch (i) {
+		case 0:
+			return "#092b3b";
+		case 2:
+			return "#042e07";
+		case 6:
+			return "#ed5311";
+		case 10:
+			return "#0b4744";
+		case 11:
+			return "#c7c400";
+		default:
+			return d3.schemePaired[i];
+	}
 }
 
 async function init() {
@@ -44,10 +50,9 @@ async function init() {
 	gData = await fetchDataFromWeb();
 	d3.selectAll(".decadeButton").attr("disabled", false);
 	gCurrentDecade = 1950;
-
 	gPieArea
 		.selectAll("path")
-		.data(gPie(getRevenueData()))
+		.data(gPie(getRevenueDataByDecade()))
 		.enter()
 		.append("path")
 		.attr("class", "piePath")
@@ -87,13 +92,14 @@ async function init() {
 		.attr("y", legendDotRadius - 2) // NEW
 		.text((d) => d);
 
+	drawAllLines();
 	changeDecade(1950);
 }
 
 function updatePie() {
 	d3.select("#donutChart")
 		.selectAll("path")
-		.data(gPie(getRevenueData()))
+		.data(gPie(getRevenueDataByDecade()))
 		.transition()
 		.duration(500)
 		.attrTween("d", arcTween)
@@ -108,18 +114,12 @@ function arcTween(a) {
 	};
 }
 
-async function fetchDataFromWeb() {
-	const isLocal = true;
-	const url = (isLocal ? "https://goodbye-moonmen.github.io/narative_viz/" : "") + "movieSimple.tsv";
-	const data = await d3.tsv(url, transformData);
-	return data;
-}
-
 function handlePiePieceLeave(toAnother) {
 	if (gCurrentHighlightGenre) {
-		d3.select(`#${gCurrentHighlightGenre}_legend`).attr("opacity", "0.8");
-		d3.select(`#${gCurrentHighlightGenre}_path`).attr("opacity", "0.8");
+		d3.select(`[id='${gCurrentHighlightGenre}_legend']`).attr("opacity", "0.8");
+		d3.select(`[id='${gCurrentHighlightGenre}_path']`).attr("opacity", "0.8");
 	}
+	d3.select("#posterCard").html("");
 	if (toAnother) {
 		d3.select("#donutInfoGeneral").html("");
 		d3.select("#donutInfoMovie").html("");
@@ -132,9 +132,9 @@ function handlePiePieceLeave(toAnother) {
 function handlePiePieceHover(_d, i) {
 	handlePiePieceLeave(true);
 	gCurrentHighlightGenre = GENRES_CONST[i];
-	const revData = getRevenueData()[i];
-	d3.select(`#${gCurrentHighlightGenre}_legend`).attr("opacity", "1");
-	d3.select(`#${gCurrentHighlightGenre}_path`).attr("opacity", "1");
+	const revData = getRevenueDataByDecade()[i];
+	d3.select(`[id='${gCurrentHighlightGenre}_legend']`).attr("opacity", "1");
+	d3.select(`[id='${gCurrentHighlightGenre}_path']`).attr("opacity", "1");
 	d3.select("#donutInfoGeneral")
 		.append("ul")
 		.style("list-style-type", "none")
@@ -161,14 +161,17 @@ function handlePiePieceHover(_d, i) {
 		.enter()
 		.append("li")
 		.html((d) => d);
+	d3.select("#posterCard")
+		.append("img")
+		.attr("src", "https://image.tmdb.org/t/p/w500" + topMovie.link)
+		.style("max-height", "400px");
 }
 
-function getRevenueData() {
+function getRevenueDataByDecade() {
 	const decadeData = gData.filter((d) => d.decade === gCurrentDecade && !!d.genres);
 	const result = GENRES_CONST.map((g) => ({ name: g, revenue: 0, revenueString: "0", count: 0, topRevenue: 0, topMovie: undefined }));
 	decadeData.forEach((d) => {
 		const limitedGenres = d.genres.filter((g) => GENRES_CONST.includes(g));
-		const splitRevenue = d.revenue / limitedGenres.length;
 		limitedGenres.forEach((g) => {
 			const index = GENRES_CONST.indexOf(g);
 			result[index]["revenue"] = result[index]["revenue"] + d.revenue;
@@ -176,7 +179,6 @@ function getRevenueData() {
 			result[index]["count"] = result[index]["count"] + 1;
 			if (d.revenue > result[index]["topRevenue"]) {
 				result[index]["topRevenue"] = d.revenue;
-				// result[index]["topMovie"] = `${d.title}(${d.year}): ${formatMoney(d.revenue)} `;
 				result[index]["topMovie"] = d;
 			}
 		});
@@ -189,63 +191,4 @@ function formatMoney(value) {
 		return `$${(value / 1000).toFixed(2)}B`;
 	}
 	return `$${value.toFixed(2)}M`;
-}
-// Data keys:
-// Decade
-// Year of Release Date
-// Title
-// Genres
-// Poster Path
-// Number of Records
-// Revenue
-function transformData(entry) {
-	const processedGenres = processGenres(entry["Genres"]);
-	if (!processGenres) {
-		console.warn("Invalid entry:" + entry["Genres"]);
-		return null;
-	} else {
-		return {
-			title: entry["Title"],
-			decade: Number(entry["Decade"]),
-			year: Number(entry["Year of Release Date"]),
-			genres: processedGenres,
-			revenue: Number(entry["Revenue"].replace(/,/g, "")) / 1000000,
-		};
-	}
-}
-
-const GENRES_CONST = [
-	"Action",
-	"Adventure",
-	// "Animation",
-	"Comedy",
-	"Crime",
-	// "Documentary",
-	"Drama",
-	"Family",
-	"Fantasy",
-	// "Foreign".
-	// "History",
-	"Horror",
-	// "Music",
-	"Mystery",
-	"Romance",
-	"Science Fiction",
-	// "TV Movies",
-	"Thriller",
-	// "War",
-	// "Western",
-];
-
-function processGenres(rawGenres) {
-	try {
-		const entryGenres = JSON.parse(rawGenres.replace(/\'/g, '"'));
-		const genresArray = entryGenres.map((genreObj) => genreObj.name);
-		if (genresArray.includes("TV Movies")) {
-			return undefined;
-		}
-		return genresArray;
-	} catch (e) {
-		return undefined;
-	}
 }

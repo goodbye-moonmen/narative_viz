@@ -4,13 +4,13 @@
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body onload="init()">
-		<h1>
-			Movie genre over the years (1950-2017)
+		<h1 style="text-align: center">
+			Movie genre through time (1950-2017)
 		</h1>
 		<div class="visualizationContainer">
-			<h3>
-				Distribution of movie revenues for each decade by genres
-			</h3>
+			<h2>
+				Select a decade
+			</h2>
 			<div id="donutSelectorContainer" style="display: flex; width:100%;">
 				<a id="decade1950" class="decadeButton ripple" onclick="changeDecade(1950)">1950s</a>
 				<a id="decade1960" class="decadeButton ripple" onclick="changeDecade(1960)">1960s</a>
@@ -20,13 +20,18 @@
 				<a id="decade2000" class="decadeButton ripple" onclick="changeDecade(2000)">2000s</a>
 				<a id="decade2010" class="decadeButton ripple" onclick="changeDecade(2010)">2010s</a>
 			</div>
+		</div>
+		<div class="visualizationContainer">
+			<h2>
+				Distribution of movie revenues for each decade by genres
+			</h2>
 			<div id="donut" style="display:flex">
 				<span id="donutChart"></span>
-				<div class="visualizationContainer" style="flex-grow: 1;text-align: left">
+				<div class="visualizationContainer" style="flex-grow: 1;text-align: left;height:400px;">
 					<h4>
 						Genre details
 					</h4>
-					<p id="donutInfoGeneral" style="height: 25%">
+					<p id="donutInfoGeneral">
 						Please hover over a section to see more details.
 					</p>
 					<h4>
@@ -36,15 +41,19 @@
 						Please hover over a section to see more details.
 					</p>
 				</div>
+				<div class="visualizationContainer" id="posterCard" style="width:300px;height: 400px"></div>
 			</div>
 		</div>
 		<div class="visualizationContainer">
-			<h3>
-				Change in movie revenues by genres
-			</h3>
-			<div id="bars" style="display:flex"></div>
+			<h2>
+				Change in genre revenues through the years
+			</h2>
+			<div id="bars"></div>
 		</div>
 		<script src="https://d3js.org/d3.v5.min.js"></script>
+		<script src="dataMgr.js"></script>
+		<script src="decadeMgr.js"></script>
 		<script src="interactivePie.js"></script>
+		<script src="massLines.js"></script>
 	</body>
 </html>
