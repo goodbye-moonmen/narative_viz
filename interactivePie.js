@@ -164,7 +164,7 @@ function handlePiePieceHover(_d, i) {
 	d3.select("#posterCard")
 		.append("img")
 		.attr("src", "https://image.tmdb.org/t/p/w500" + topMovie.link)
-		.style("max-height", "320px");
+		.style("max-height", "280px");
 }
 
 function getRevenueDataByDecade() {
